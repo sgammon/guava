@@ -199,6 +199,7 @@
             <link>https://errorprone.info/api/latest/</link>
           </links>
           <overview>../overview.html</overview>
+          <additionalJOption>${maven-javadoc-plugin.additionalJOptions}</additionalJOption>
         </configuration>
       </plugin>
       <plugin>

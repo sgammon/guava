@@ -25,6 +25,7 @@
     <project.build.outputTimestamp>2024-01-02T00:00:00Z</project.build.outputTimestamp>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <test.add.opens></test.add.opens>
+    <test.add.args></test.add.args>
     <module.status>integration</module.status>
     <variant.jvmEnvironment>android</variant.jvmEnvironment>
     <variant.jvmEnvironmentVariantName>android</variant.jvmEnvironmentVariantName>
@@ -253,7 +254,7 @@
             <runOrder>alphabetical</runOrder>
             <!-- Set max heap for tests. -->
             <!-- Catch dependencies on the default locale by setting it to hi-IN. -->
-            <argLine>-Xmx1536M -Duser.language=hi -Duser.country=IN ${test.add.opens}</argLine>
+            <argLine>-Xmx1536M -Duser.language=hi -Duser.country=IN ${test.add.args} ${test.add.opens}</argLine>
           </configuration>
         </plugin>
         <plugin>
@@ -355,6 +356,19 @@
       </activation>
       <properties>
         <maven-javadoc-plugin.additionalJOptions>--no-module-directories</maven-javadoc-plugin.additionalJOptions>
+      </properties>
+    </profile>
+    <profile>
+      <!--
+          In order to build against JDK 19+, Javadoc needs to enable Java preview features, because JDK sources
+          themselves have code which defines/uses preview features.
+       -->
+      <id>javadocs-jdk19plus</id>
+      <activation>
+        <jdk>[19,]</jdk>
+      </activation>
+      <properties>
+        <maven-javadoc-plugin.additionalJOptions>--enable-preview</maven-javadoc-plugin.additionalJOptions>
       </properties>
     </profile>
     <profile>
@@ -461,6 +475,19 @@
           </plugin>
         </plugins>
       </build>
+    </profile>
+    <profile>
+      <id>javac-for-jvm18plus</id>
+      <activation>
+        <!--
+            In order to build and run the tests against JDK 19+, we need to pass java.security.manager=allow, to make
+            the deprecated 'java.lang.SecurityManager' available for use.
+         -->
+        <jdk>[18,]</jdk>
+      </activation>
+      <properties>
+        <test.add.args>-Djava.security.manager=allow</test.add.args>
+      </properties>
     </profile>
   </profiles>
 </project>
