@@ -12,7 +12,7 @@ jobs:
   ## Run main CI build and tests.
   run-ci:
     name: "Build"
-    uses: ./.github/workflows/ci.yml
+    uses: ./.github/workflows/ci.build.yml
     permissions:
       actions: write
       contents: write
