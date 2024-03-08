@@ -109,3 +109,7 @@ jobs:
         if: matrix.java == 11
         shell: bash
         run: util/gradle_integration_tests.sh
+      - name: 'Test Reports'
+        if: success() || failure()
+        uses: scacap/action-surefire-report@a2911bd1a4412ec18dde2d93b1758b3e56d2a880 # v1.8.0
+        continue-on-error: true
