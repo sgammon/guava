@@ -1,35 +1,61 @@
-name: CI
+name: Build
 
 on:
-  workflow_call: {}
-  workflow_dispatch: {}
+  workflow_call:
+    inputs:
+      provenance:
+        type: boolean
+        description: "Provenance"
+        default: false
+      provenance_publish:
+        type: boolean
+        description: "Publish: Provenance"
+        default: true
+      snapshot:
+        type: boolean
+        description: "Publish: Snapshot"
+        default: false
+      repository:
+        type: string
+        description: "Publish Repository"
+        default: "sonatype-nexus-snapshots"
+
+  workflow_dispatch:
+    inputs:
+      provenance:
+        type: boolean
+        description: "Provenance"
+        default: false
+      provenance_publish:
+        type: boolean
+        description: "Publish: Provenance"
+        default: false
+      snapshot:
+        type: boolean
+        description: "Publish: Snapshot"
+        default: true
+      repository:
+        type: string
+        description: "Publish Repository"
+        default: "sonatype-nexus-snapshots"
 
 permissions:
   contents: read
 
 jobs:
-  test:
-    permissions:
-      actions: write  # for styfle/cancel-workflow-action to cancel/stop running workflows
-      contents: read  # for actions/checkout to fetch code
-    name: "JDK ${{ matrix.java }} / ${{ matrix.mode }} (${{ matrix.os }})"
+  build:
     strategy:
+      fail-fast: false
       matrix:
-        os: [ ubuntu-latest ]
-        java: [ 8, 11, 17 ]
-        mode: [ 'JRE', 'Android' ]
-        include:
-          - os: windows-latest
-            java: 17
-            mode: JRE
-            root-pom: pom.xml
-          - os: windows-latest
-            java: 17
-            mode: Android
-            root-pom: pom.xml
-    runs-on: ${{ matrix.os }}
+        mode: ["JRE", "Android"]
+    name: "Build Guava (${{ matrix.mode }})"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read  # for actions/checkout to fetch code
+    outputs:
+      hashes: ${{ steps.hash.outputs.hashes }}
     env:
-      ROOT_POM: ${{ matrix.root-pom == 'Android' && 'android/pom.xml' || 'pom.xml' }}
+      ROOT_POM: ${{ matrix.mode == 'Android' && 'android/pom.xml' || 'pom.xml' }}
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
@@ -61,23 +87,40 @@ jobs:
       - name: 'Install'
         shell: bash
         run: ./mvnw -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn install -U -DskipTests=true -f $ROOT_POM
-      - name: 'Test'
+      - name: Generate hashes
         shell: bash
-        run: ./mvnw -B -P!standard-with-extra-repos verify -U -Dmaven.javadoc.skip=true -f $ROOT_POM
-      - name: 'Print Surefire reports'
-        # Note: Normally a step won't run if the job has failed, but this causes it to
-        if: ${{ failure() }}
-        shell: bash
-        run: ./util/print_surefire_reports.sh
-      - name: 'Integration Test'
-        if: matrix.java == 11
-        shell: bash
-        run: util/gradle_integration_tests.sh
+        id: hash
+        run: |
+          echo "hashes=$(sha256sum guava/target/*.jar guava-gwt/target/*.jar guava-testlib/target/*.jar | base64 -w0)" >> "$GITHUB_OUTPUT"
+      - name: 'Upload artifacts'
+        uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
+        with:
+          name: guava-artifacts-${{ github.sha }}-${{ matrix.mode == 'Android' && 'android' || 'jre' }}
+          path: |
+            guava/target/*.jar
+            guava-gwt/target/*.jar
+            guava-testlib/target/*.jar
+          if-no-files-found: warn
+          retention-days: 7
 
+  # Generate SLSA provenance
+  provenance:
+    needs: [build]
+    if: inputs.provenance
+    permissions:
+      actions: read
+      id-token: write
+      contents: write
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.9.0
+    with:
+      base64-subjects: "${{ needs.test.outputs.hashes }}"
+      upload-assets: ${{ inputs.provenance_publish }}
+
+  # Publish snapshot JAR
   publish_snapshot:
-    name: 'Publish snapshot'
-    needs: test
-    if: github.event_name == 'push' && github.repository == 'google/guava'
+    name: 'Publish Snapshot'
+    needs: [build, provenance]
+    if: inputs.snapshot
     runs-on: ubuntu-latest
     steps:
       - name: Harden Runner
@@ -91,10 +134,14 @@ jobs:
         with:
           java-version: 11
           distribution: 'zulu'
-          server-id: sonatype-nexus-snapshots
+          server-id: ${{ inputs.repository }}
           server-username: CI_DEPLOY_USERNAME
           server-password: CI_DEPLOY_PASSWORD
           cache: 'maven'
+      - name: "Download artifacts"
+        uses: actions/download-artifact@c850b930e6ba138125429b7e5c93fc707a7f8427 # v4.1.4
+        with:
+          name: guava-artifacts-${{ github.sha }}
       - name: 'Publish'
         env:
           CI_DEPLOY_USERNAME: ${{ secrets.CI_DEPLOY_USERNAME }}
@@ -104,7 +151,7 @@ jobs:
   generate_docs:
     permissions:
       contents: write
-    name: 'Generate latest docs'
+    name: 'Generate Docs'
     needs: test
     if: github.event_name == 'push' && github.repository == 'google/guava'
     runs-on: ubuntu-latest

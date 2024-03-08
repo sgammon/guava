@@ -1,0 +1,111 @@
+name: Tests
+
+on:
+  workflow_call:
+    inputs:
+      provenance:
+        type: boolean
+        description: "Provenance"
+        default: false
+      provenance_publish:
+        type: boolean
+        description: "Publish: Provenance"
+        default: true
+      snapshot:
+        type: boolean
+        description: "Publish: Snapshot"
+        default: false
+      repository:
+        type: string
+        description: "Publish Repository"
+        default: "sonatype-nexus-snapshots"
+
+  workflow_dispatch:
+    inputs:
+      provenance:
+        type: boolean
+        description: "Provenance"
+        default: false
+      provenance_publish:
+        type: boolean
+        description: "Publish: Provenance"
+        default: false
+      snapshot:
+        type: boolean
+        description: "Publish: Snapshot"
+        default: true
+      repository:
+        type: string
+        description: "Publish Repository"
+        default: "sonatype-nexus-snapshots"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    permissions:
+      contents: read  # for actions/checkout to fetch code
+    name: "JDK ${{ matrix.java }} ${{ matrix.mode }} (${{ matrix.os }})"
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ]
+        java: [ 8, 11, 17 ]
+        mode: [ 'JRE', 'Android' ]
+        include:
+          - os: windows-latest
+            java: 17
+            mode: JRE
+            root-pom: pom.xml
+          - os: windows-latest
+            java: 17
+            mode: Android
+            root-pom: pom.xml
+    runs-on: ${{ matrix.os }}
+    outputs:
+      hashes: ${{ steps.hash.outputs.hashes }}
+    env:
+      ROOT_POM: ${{ matrix.root-pom == 'Android' && 'android/pom.xml' || 'pom.xml' }}
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
+        with:
+          disable-sudo: true
+          egress-policy: block
+          allowed-endpoints: >
+            api.azul.com:443
+            api.github.com:443
+            cdn.azul.com:443
+            dl.google.com:443
+            docs.oracle.com:443
+            errorprone.info:443
+            github.com:443
+            objects.githubusercontent.com:443
+            oss.sonatype.org:443
+            repo.maven.apache.org:443
+            services.gradle.org:443
+      - name: 'Check out repository'
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          persist-credentials: false
+      - name: 'Set up JDK ${{ matrix.java }}'
+        uses: actions/setup-java@9704b39bf258b59bc04b50fa2dd55e9ed76b47a8 # v4.1.0
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: 'zulu'
+          cache: 'maven'
+      - name: 'Install'
+        shell: bash
+        run: ./mvnw -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn install -U -DskipTests=true -f $ROOT_POM
+      - name: 'Test'
+        shell: bash
+        run: ./mvnw -B -P!standard-with-extra-repos verify -U -Dmaven.javadoc.skip=true -f $ROOT_POM
+      - name: 'Print Surefire reports'
+        # Note: Normally a step won't run if the job has failed, but this causes it to
+        if: ${{ failure() }}
+        shell: bash
+        run: ./util/print_surefire_reports.sh
+      - name: 'Integration Test'
+        if: matrix.java == 11
+        shell: bash
+        run: util/gradle_integration_tests.sh
