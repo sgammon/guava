@@ -62,21 +62,12 @@
       </plugin>
       <plugin>
         <artifactId>maven-jar-plugin</artifactId>
-        <configuration>
-          <archive>
-            <manifestEntries>
-              <Multi-Release>true</Multi-Release>
-            </manifestEntries>
-          </archive>
-          <!-- Exclude root `module-info.class` -->
-          <excludes>/module-info.class</excludes>
-        </configuration>
       </plugin>
       <plugin>
         <extensions>true</extensions>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
-        <version>5.1.8</version>
+        <version>5.1.9</version>
         <executions>
           <execution>
             <id>bundle-manifest</id>
@@ -91,6 +82,7 @@
             <Export-Package>
               !com.google.common.base.internal,
               !com.google.common.util.concurrent.internal,
+              !META-INF.*,
               com.google.common.*
             </Export-Package>
             <Import-Package>
@@ -114,6 +106,10 @@
               <excludes>
                 <exclude>module-info.java</exclude>
               </excludes>
+              <compilerArgs combine.children="append" combine.self="append">
+                <arg>-Xlint:-removal,-options</arg>
+                <arg>-XDignore.symbol.file</arg>
+              </compilerArgs>
             </configuration>
           </execution>
           <execution>
