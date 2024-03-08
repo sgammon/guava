@@ -1,0 +1,26 @@
+name: Push
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: read
+
+jobs:
+  ## Run main CI build and tests.
+  run-ci:
+    name: "Build & Test"
+    uses: ./.github/workflows/ci.yml
+    permissions:
+      actions: write
+      contents: write
+
+  ## Publish and check the dependency graph.
+  checks-dependency-graph:
+    name: "Checks"
+    uses: ./.github/workflows/dependency-review.yml
+    permissions:
+      contents: read
+      id-token: write
