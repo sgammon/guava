@@ -101,6 +101,17 @@
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>9</source>
+          <target>9</target>
+          <compilerArgs>
+            <compilerArg>--add-reads=com.google.common.testlib=ALL-UNNAMED</compilerArg>
+          </compilerArgs>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 </project>
