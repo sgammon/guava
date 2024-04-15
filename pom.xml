@@ -393,7 +393,7 @@
         </build>
       </profile>
       <profile>
-        <id>signing</id>
+        <id>sigstore</id>
         <build>
           <plugins>
             <plugin>
@@ -408,6 +408,19 @@
                 </execution>
               </executions>
             </plugin>
+          </plugins>
+        </build>
+        <activation>
+          <property>
+            <name>sign</name>
+            <value>true</value>
+          </property>
+        </activation>
+      </profile>
+      <profile>
+        <id>signing</id>
+        <build>
+          <plugins>
             <plugin>
               <artifactId>maven-gpg-plugin</artifactId>
               <executions>
