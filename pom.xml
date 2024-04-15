@@ -390,8 +390,45 @@
               </executions>
             </plugin>
           </plugins>
-      </build>
-    </profile>
+        </build>
+      </profile>
+      <profile>
+        <id>signing</id>
+        <build>
+          <plugins>
+            <plugin>
+              <groupId>dev.sigstore</groupId>
+              <artifactId>sigstore-maven-plugin</artifactId>
+              <executions>
+                <execution>
+                  <id>sign</id>
+                  <goals>
+                    <goal>sign</goal>
+                  </goals>
+                </execution>
+              </executions>
+            </plugin>
+            <plugin>
+              <artifactId>maven-gpg-plugin</artifactId>
+              <executions>
+                <execution>
+                  <id>sign-artifacts</id>
+                  <phase>verify</phase>
+                  <goals>
+                    <goal>sign</goal>
+                  </goals>
+                </execution>
+              </executions>
+            </plugin>
+          </plugins>
+        </build>
+        <activation>
+          <property>
+            <name>sign</name>
+            <value>true</value>
+          </property>
+        </activation>
+      </profile>
     <profile>
       <!--
           Passes JDK 11-12-specific `no-module-directories` flag to Javadoc tool,
