@@ -377,7 +377,7 @@
         </build>
         <activation>
           <property>
-            <name>sign</name>
+            <name>sigstore</name>
             <value>true</value>
           </property>
         </activation>
