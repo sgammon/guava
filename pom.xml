@@ -289,11 +289,6 @@
           <version>3.0.1</version>
         </plugin>
         <plugin>
-          <groupId>dev.sigstore</groupId>
-          <artifactId>sigstore-maven-plugin</artifactId>
-          <version>0.4.0</version>
-        </plugin>
-        <plugin>
           <groupId>org.spdx</groupId>
           <artifactId>spdx-maven-plugin</artifactId>
           <version>0.7.3</version>
@@ -368,6 +363,7 @@
             <plugin>
               <groupId>dev.sigstore</groupId>
               <artifactId>sigstore-maven-plugin</artifactId>
+              <version>0.4.0</version>
               <executions>
                 <execution>
                   <id>sign</id>
