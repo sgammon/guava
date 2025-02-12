@@ -23,6 +23,8 @@ import static com.google.common.collect.Iterators.mergeSorted;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.GwtCompatible;
+import com.google.common.annotations.GwtIncompatible;
+import com.google.common.annotations.J2ktIncompatible;
 import com.google.common.base.Supplier;
 import com.google.errorprone.annotations.InlineMe;
 import java.io.Serializable;
@@ -84,7 +86,7 @@ public class TreeBasedTable<R, C, V> extends StandardRowSortedTable<R, C, V> {
       return new TreeMap<>(comparator);
     }
 
-    private static final long serialVersionUID = 0;
+    @GwtIncompatible @J2ktIncompatible private static final long serialVersionUID = 0;
   }
 
   /**
@@ -119,7 +121,7 @@ public class TreeBasedTable<R, C, V> extends StandardRowSortedTable<R, C, V> {
    */
   public static <R, C, V> TreeBasedTable<R, C, V> create(TreeBasedTable<R, C, ? extends V> table) {
     TreeBasedTable<R, C, V> result =
-        new TreeBasedTable<>(table.rowComparator(), table.columnComparator());
+        new TreeBasedTable<>(table.rowKeySet().comparator(), table.columnComparator());
     result.putAll(table);
     return result;
   }
@@ -301,18 +303,6 @@ public class TreeBasedTable<R, C, V> extends StandardRowSortedTable<R, C, V> {
     }
   }
 
-  // rowKeySet() and rowMap() are defined here so they appear in the Javadoc.
-
-  @Override
-  public SortedSet<R> rowKeySet() {
-    return super.rowKeySet();
-  }
-
-  @Override
-  public SortedMap<R, Map<C, V>> rowMap() {
-    return super.rowMap();
-  }
-
   /** Overridden column iterator to return columns values in globally sorted order. */
   @Override
   Iterator<C> createColumnKeyIterator() {
@@ -345,5 +335,5 @@ public class TreeBasedTable<R, C, V> extends StandardRowSortedTable<R, C, V> {
     };
   }
 
-  private static final long serialVersionUID = 0;
+  @GwtIncompatible @J2ktIncompatible private static final long serialVersionUID = 0;
 }

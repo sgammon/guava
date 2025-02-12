@@ -652,6 +652,7 @@ public final class TreeMultiset<E extends @Nullable Object> extends AbstractSort
       }
     }
 
+    @CanIgnoreReturnValue
     private AvlNode<E> addRightChild(@ParametricNullness E e, int count) {
       right = new AvlNode<>(e, count);
       successor(this, right, succ());
@@ -661,6 +662,7 @@ public final class TreeMultiset<E extends @Nullable Object> extends AbstractSort
       return this;
     }
 
+    @CanIgnoreReturnValue
     private AvlNode<E> addLeftChild(@ParametricNullness E e, int count) {
       left = new AvlNode<>(e, count);
       successor(pred(), left, this);
@@ -1089,7 +1091,5 @@ public final class TreeMultiset<E extends @Nullable Object> extends AbstractSort
     Serialization.populateMultiset(this, stream);
   }
 
-  @GwtIncompatible // not needed in emulated source
-  @J2ktIncompatible
-  private static final long serialVersionUID = 1;
+  @GwtIncompatible @J2ktIncompatible private static final long serialVersionUID = 1;
 }

@@ -81,7 +81,7 @@ public class MultimapsTest extends TestCase {
   private static final Comparator<Integer> INT_COMPARATOR =
       Ordering.<Integer>natural().reverse().nullsFirst();
 
-  @SuppressWarnings("deprecation")
+  @SuppressWarnings({"deprecation", "InlineMeInliner"}) // test of a deprecated method
   public void testUnmodifiableListMultimapShortCircuit() {
     ListMultimap<String, Integer> mod = ArrayListMultimap.create();
     ListMultimap<String, Integer> unmod = Multimaps.unmodifiableListMultimap(mod);
@@ -94,7 +94,7 @@ public class MultimapsTest extends TestCase {
         immutable, Multimaps.unmodifiableListMultimap((ListMultimap<String, Integer>) immutable));
   }
 
-  @SuppressWarnings("deprecation")
+  @SuppressWarnings({"deprecation", "InlineMeInliner"}) // test of a deprecated method
   public void testUnmodifiableSetMultimapShortCircuit() {
     SetMultimap<String, Integer> mod = HashMultimap.create();
     SetMultimap<String, Integer> unmod = Multimaps.unmodifiableSetMultimap(mod);
@@ -107,7 +107,7 @@ public class MultimapsTest extends TestCase {
         immutable, Multimaps.unmodifiableSetMultimap((SetMultimap<String, Integer>) immutable));
   }
 
-  @SuppressWarnings("deprecation")
+  @SuppressWarnings({"deprecation", "InlineMeInliner"}) // test of a deprecated method
   public void testUnmodifiableMultimapShortCircuit() {
     Multimap<String, Integer> mod = HashMultimap.create();
     Multimap<String, Integer> unmod = Multimaps.unmodifiableMultimap(mod);
@@ -547,7 +547,7 @@ public class MultimapsTest extends TestCase {
       return new LinkedList<>();
     }
 
-    private static final long serialVersionUID = 0;
+    @GwtIncompatible @J2ktIncompatible private static final long serialVersionUID = 0;
   }
 
   public void testNewMultimapWithCollectionRejectingNegativeElements() {
@@ -641,7 +641,7 @@ public class MultimapsTest extends TestCase {
       return new LinkedList<>();
     }
 
-    private static final long serialVersionUID = 0;
+    @GwtIncompatible @J2ktIncompatible private static final long serialVersionUID = 0;
   }
 
   public void testNewListMultimap() {
@@ -677,7 +677,7 @@ public class MultimapsTest extends TestCase {
       return new HashSet<>(4);
     }
 
-    private static final long serialVersionUID = 0;
+    @GwtIncompatible @J2ktIncompatible private static final long serialVersionUID = 0;
   }
 
   public void testNewSetMultimap() {
@@ -709,7 +709,7 @@ public class MultimapsTest extends TestCase {
       return Sets.newTreeSet(INT_COMPARATOR);
     }
 
-    private static final long serialVersionUID = 0;
+    @GwtIncompatible @J2ktIncompatible private static final long serialVersionUID = 0;
   }
 
   public void testNewSortedSetMultimap() {

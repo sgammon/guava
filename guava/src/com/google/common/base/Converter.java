@@ -18,6 +18,8 @@ import static com.google.common.base.NullnessCasts.uncheckedCastNullableTToT;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.GwtCompatible;
+import com.google.common.annotations.GwtIncompatible;
+import com.google.common.annotations.J2ktIncompatible;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.errorprone.annotations.ForOverride;
 import com.google.errorprone.annotations.InlineMe;
@@ -265,10 +267,8 @@ public abstract class Converter<A, B> implements Function<A, B> {
    */
   public Iterable<B> convertAll(Iterable<? extends A> fromIterable) {
     checkNotNull(fromIterable, "fromIterable");
-    return new Iterable<B>() {
-      @Override
-      public Iterator<B> iterator() {
-        return new Iterator<B>() {
+    return () ->
+        new Iterator<B>() {
           private final Iterator<? extends A> fromIterator = fromIterable.iterator();
 
           @Override
@@ -286,8 +286,6 @@ public abstract class Converter<A, B> implements Function<A, B> {
             fromIterator.remove();
           }
         };
-      }
-    };
   }
 
   /**
@@ -363,7 +361,7 @@ public abstract class Converter<A, B> implements Function<A, B> {
       return original + ".reverse()";
     }
 
-    private static final long serialVersionUID = 0L;
+    @GwtIncompatible @J2ktIncompatible private static final long serialVersionUID = 0L;
   }
 
   /**
@@ -438,7 +436,7 @@ public abstract class Converter<A, B> implements Function<A, B> {
       return first + ".andThen(" + second + ")";
     }
 
-    private static final long serialVersionUID = 0L;
+    @GwtIncompatible @J2ktIncompatible private static final long serialVersionUID = 0L;
   }
 
   /**
@@ -597,6 +595,6 @@ public abstract class Converter<A, B> implements Function<A, B> {
       return INSTANCE;
     }
 
-    private static final long serialVersionUID = 0L;
+    @GwtIncompatible @J2ktIncompatible private static final long serialVersionUID = 0L;
   }
 }

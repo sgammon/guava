@@ -501,7 +501,7 @@ public abstract class ImmutableSortedSet<E> extends ImmutableSet.CachingAsList<E
       copyIfNecessary();
       if (n == elements.length) {
         sortAndDedup();
-        /**
+        /*
          * sortAndDedup may have made enough room for this element, but that's not necessarily good
          * enough. Consider, for example, the case where we have a buffer of size (n+1), add n
          * distinct elements, and add the last element over again many times over. We don't want a
@@ -870,7 +870,7 @@ public abstract class ImmutableSortedSet<E> extends ImmutableSet.CachingAsList<E
       return new Builder<E>(comparator).add((E[]) elements).build();
     }
 
-    private static final long serialVersionUID = 0;
+    @GwtIncompatible @J2ktIncompatible private static final long serialVersionUID = 0;
   }
 
   @J2ktIncompatible // serialization
@@ -1031,5 +1031,5 @@ public abstract class ImmutableSortedSet<E> extends ImmutableSet.CachingAsList<E
     throw new UnsupportedOperationException();
   }
 
-  private static final long serialVersionUID = 0xcafebabe;
+  @GwtIncompatible @J2ktIncompatible private static final long serialVersionUID = 0xcafebabe;
 }

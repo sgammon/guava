@@ -291,9 +291,7 @@ public final class Multimaps {
       setMap(map);
     }
 
-    @GwtIncompatible // java serialization not supported
-    @J2ktIncompatible
-    private static final long serialVersionUID = 0;
+    @GwtIncompatible @J2ktIncompatible private static final long serialVersionUID = 0;
   }
 
   /**
@@ -377,9 +375,7 @@ public final class Multimaps {
       setMap(map);
     }
 
-    @GwtIncompatible // java serialization not supported
-    @J2ktIncompatible
-    private static final long serialVersionUID = 0;
+    @GwtIncompatible @J2ktIncompatible private static final long serialVersionUID = 0;
   }
 
   /**
@@ -485,9 +481,7 @@ public final class Multimaps {
       setMap(map);
     }
 
-    @GwtIncompatible // not needed in emulated source
-    @J2ktIncompatible
-    private static final long serialVersionUID = 0;
+    @GwtIncompatible @J2ktIncompatible private static final long serialVersionUID = 0;
   }
 
   /**
@@ -579,9 +573,7 @@ public final class Multimaps {
       setMap(map);
     }
 
-    @GwtIncompatible // not needed in emulated source
-    @J2ktIncompatible
-    private static final long serialVersionUID = 0;
+    @GwtIncompatible @J2ktIncompatible private static final long serialVersionUID = 0;
   }
 
   /**
@@ -706,8 +698,7 @@ public final class Multimaps {
         result =
             map =
                 Collections.unmodifiableMap(
-                    Maps.transformValues(
-                        delegate.asMap(), collection -> unmodifiableValueCollection(collection)));
+                    Maps.transformValues(delegate.asMap(), Multimaps::unmodifiableValueCollection));
       }
       return result;
     }
@@ -783,7 +774,7 @@ public final class Multimaps {
       return result;
     }
 
-    private static final long serialVersionUID = 0;
+    @GwtIncompatible @J2ktIncompatible private static final long serialVersionUID = 0;
   }
 
   private static class UnmodifiableListMultimap<
@@ -813,7 +804,7 @@ public final class Multimaps {
       throw new UnsupportedOperationException();
     }
 
-    private static final long serialVersionUID = 0;
+    @GwtIncompatible @J2ktIncompatible private static final long serialVersionUID = 0;
   }
 
   private static class UnmodifiableSetMultimap<
@@ -852,7 +843,7 @@ public final class Multimaps {
       throw new UnsupportedOperationException();
     }
 
-    private static final long serialVersionUID = 0;
+    @GwtIncompatible @J2ktIncompatible private static final long serialVersionUID = 0;
   }
 
   private static class UnmodifiableSortedSetMultimap<
@@ -887,7 +878,7 @@ public final class Multimaps {
       return delegate().valueComparator();
     }
 
-    private static final long serialVersionUID = 0;
+    @GwtIncompatible @J2ktIncompatible private static final long serialVersionUID = 0;
   }
 
   /**
@@ -1284,6 +1275,7 @@ public final class Multimaps {
       return map.hashCode();
     }
 
+    @GwtIncompatible @J2ktIncompatible
     private static final long serialVersionUID = 7845222491160860175L;
   }
 
@@ -1523,7 +1515,7 @@ public final class Multimaps {
 
     @Override
     Map<K, Collection<V2>> createAsMap() {
-      return Maps.transformEntries(fromMultimap.asMap(), (key, value) -> transform(key, value));
+      return Maps.transformEntries(fromMultimap.asMap(), this::transform);
     }
 
     @Override
@@ -1894,7 +1886,7 @@ public final class Multimaps {
 
       @Override
       public Iterator<Entry<K, Collection<V>>> iterator() {
-        return Maps.asMapEntryIterator(multimap.keySet(), key -> multimap.get(key));
+        return Maps.asMapEntryIterator(multimap.keySet(), multimap::get);
       }
 
       @Override

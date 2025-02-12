@@ -17,6 +17,7 @@ package com.google.common.primitives;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkPositionIndexes;
+import static java.security.AccessController.doPrivileged;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.GwtIncompatible;
@@ -26,11 +27,11 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.j2objc.annotations.J2ObjCIncompatible;
 import java.lang.reflect.Field;
 import java.nio.ByteOrder;
-import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Objects;
 import org.jspecify.annotations.Nullable;
 import sun.misc.Unsafe;
 
@@ -328,7 +329,7 @@ public final class UnsignedBytes {
       static {
         // fall back to the safer pure java implementation unless we're in
         // a 64-bit JVM with an 8-byte aligned field offset.
-        if (!("64".equals(System.getProperty("sun.arch.data.model"))
+        if (!(Objects.equals(System.getProperty("sun.arch.data.model"), "64")
             && (BYTE_ARRAY_BASE_OFFSET % 8) == 0
             // sanity check - this should never fail
             && theUnsafe.arrayIndexScale(byte[].class) == 1)) {
@@ -349,21 +350,19 @@ public final class UnsignedBytes {
           // that's okay; try reflection instead
         }
         try {
-          return AccessController.doPrivileged(
-              new PrivilegedExceptionAction<Unsafe>() {
-                @Override
-                public Unsafe run() throws Exception {
-                  Class<Unsafe> k = Unsafe.class;
-                  for (Field f : k.getDeclaredFields()) {
-                    f.setAccessible(true);
-                    Object x = f.get(null);
-                    if (k.isInstance(x)) {
-                      return k.cast(x);
+          return doPrivileged(
+              (PrivilegedExceptionAction<Unsafe>)
+                  () -> {
+                    Class<Unsafe> k = Unsafe.class;
+                    for (Field f : k.getDeclaredFields()) {
+                      f.setAccessible(true);
+                      Object x = f.get(null);
+                      if (k.isInstance(x)) {
+                        return k.cast(x);
+                      }
                     }
-                  }
-                  throw new NoSuchFieldError("the Unsafe");
-                }
-              });
+                    throw new NoSuchFieldError("the Unsafe");
+                  });
         } catch (PrivilegedActionException e) {
           throw new RuntimeException("Could not initialize intrinsics", e.getCause());
         }

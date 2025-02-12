@@ -209,7 +209,7 @@ public final class BloomFilter<T extends @Nullable Object> implements Predicate<
     long bitSize = bits.bitSize();
     long bitCount = bits.bitCount();
 
-    /**
+    /*
      * Each insertion is expected to reduce the # of clear bits by a factor of
      * `numHashFunctions/bitSize`. So, after n insertions, expected bitCount is `bitSize * (1 - (1 -
      * numHashFunctions/bitSize)^n)`. Solving that for n, and approximating `ln x` as `x - 1` when x
@@ -623,6 +623,11 @@ public final class BloomFilter<T extends @Nullable Object> implements Predicate<
       numHashFunctions = UnsignedBytes.toInt(din.readByte());
       dataLength = din.readInt();
 
+      /*
+       * We document in BloomFilterStrategies that we must not change the ordering, and we have a
+       * test that verifies that we don't do so.
+       */
+      @SuppressWarnings("EnumOrdinal")
       Strategy strategy = BloomFilterStrategies.values()[strategyOrdinal];
 
       LockFreeBitArray dataArray = new LockFreeBitArray(LongMath.checkedMultiply(dataLength, 64L));
